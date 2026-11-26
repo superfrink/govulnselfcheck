@@ -16,7 +16,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/superfrink/govulnselfcheck"
 	"github.com/superfrink/govulnselfcheck/osv"
 )
 
@@ -88,8 +87,8 @@ func (d *DB) EntryCalls(id string) int {
 	return d.entryCalls[id]
 }
 
-// Index implements selfcheck.Database.
-func (d *DB) Index(ctx context.Context) (*selfcheck.Index, error) {
+// Index implements osv.Database.
+func (d *DB) Index(ctx context.Context) (*osv.Index, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.indexCalls++
@@ -99,7 +98,7 @@ func (d *DB) Index(ctx context.Context) (*selfcheck.Index, error) {
 	if d.failIdx != nil {
 		return nil, d.failIdx
 	}
-	ix := &selfcheck.Index{Modules: map[string][]selfcheck.Ref{}, ETag: "testdb"}
+	ix := &osv.Index{Modules: map[string][]osv.Ref{}, ETag: "testdb"}
 	for _, e := range d.entries {
 		for _, a := range e.Affected {
 			path := a.Module
@@ -109,7 +108,7 @@ func (d *DB) Index(ctx context.Context) (*selfcheck.Index, error) {
 			if path == "" {
 				continue
 			}
-			ix.Modules[path] = append(ix.Modules[path], selfcheck.Ref{
+			ix.Modules[path] = append(ix.Modules[path], osv.Ref{
 				ID:    e.ID,
 				Fixed: firstFix(a.Ranges),
 			})
@@ -118,7 +117,7 @@ func (d *DB) Index(ctx context.Context) (*selfcheck.Index, error) {
 	return ix, nil
 }
 
-// Entry implements selfcheck.Database.
+// Entry implements osv.Database.
 func (d *DB) Entry(ctx context.Context, goID string) (*osv.Entry, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -139,14 +138,14 @@ func (d *DB) Entry(ctx context.Context, goID string) (*osv.Entry, error) {
 	return e, nil
 }
 
-// NotFoundError is returned for a GO ID that was never added. selfcheck.NotFound
+// NotFoundError is returned for a GO ID that was never added. A check
 // recognises it through NotFound below, the same contract a real database's 404
 // satisfies.
 type NotFoundError struct{ ID string }
 
 func (e *NotFoundError) Error() string { return "testdb: no entry " + e.ID }
 
-// NotFound makes selfcheck.NotFound report true for this error.
+// NotFound reports that the advisory does not exist.
 func (e *NotFoundError) NotFound() bool { return true }
 
 // ErrNotFound reports an advisory missing from the fake database.

@@ -21,6 +21,8 @@ type config struct {
 	clock       func() time.Time
 	logger      *slog.Logger
 	interval    time.Duration
+	onError     ErrorHandler
+
 	jitter      float64
 	packages    []string
 	packagesSet bool
@@ -182,8 +184,9 @@ func WithInterval(d time.Duration) Option {
 	}
 }
 
-// WithJitter spreads periodic checks by ±f (0.2 means ±20%). Replicas started
-// together would otherwise hit the database together.
+// WithJitter spreads periodic checks by ±f of the interval (0.2 means ±20%,
+// the default). Replicas started together would otherwise hit the database
+// together.
 func WithJitter(f float64) Option {
 	return func(c *config) error {
 		if f < 0 || f > 1 {

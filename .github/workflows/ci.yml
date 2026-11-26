@@ -24,9 +24,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Deliberately floats: the oldest supported Go and the newest stable.
-        # Testing a moving target is the point here.
-        go: ['1.22.x', 'stable']
+        # The go directive is 1.25 because x/mod v0.40 (the version that clears
+        # GO-2026-6179/6180) requires it. The oldest supported release is
+        # pinned; stable floats, because testing a moving target is the point.
+        go: ['1.25.x', 'stable']
     steps:
       # Actions are pinned to a commit SHA, with the tag in the comment. A tag
       # can be moved to another commit; a SHA cannot.

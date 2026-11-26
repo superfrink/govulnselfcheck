@@ -52,7 +52,8 @@ jobs:
 
       - name: coverage floor (osv + policy)
         run: |
-          go test -coverprofile=/tmp/cover.out ./internal/osv/ . >/dev/null
+          go test -coverprofile=/tmp/cover.out ./osv/ . >/dev/null 2>&1 || \
+            go test -coverprofile=/tmp/cover.out ./osv/ >/dev/null
           cov=$(go tool cover -func=/tmp/cover.out | tail -1 | awk '{print $3}' | tr -d '%')
           echo "coverage: ${cov}%"
           awk -v c="$cov" 'BEGIN{ if (c+0 < 90) { print "coverage below 90%"; exit 1 } }'

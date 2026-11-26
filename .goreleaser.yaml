@@ -1,0 +1,44 @@
+version: 2
+
+project_name: govulnselfcheck
+
+builds:
+  - id: govulnselfcheck
+    main: ./examples/selfcheck-cli
+    binary: govulnselfcheck
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+
+archives:
+  - formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: checksums.txt
+
+# Keyless: cosign takes a short-lived certificate from Fulcio for this workflow
+# run, signs checksums.txt, and records the signing in the Rekor transparency
+# log. No private key is stored anywhere. One signature covers every file,
+# because checksums.txt lists them all.
+signs:
+  - cmd: cosign
+    signature: '${artifact}.sigstore.json'
+    args:
+      - sign-blob
+      - '--bundle=${signature}'
+      - '${artifact}'
+
+changelog:
+  use: github
+  format: '{{ .Message }} ({{ .SHA }})'

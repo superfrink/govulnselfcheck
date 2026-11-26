@@ -1,0 +1,49 @@
+name: vulncheck
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly, Monday 05:17 UTC, so a new advisory in a dependency or in the
+    # runner's Go release shows up as a red job.
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: scan this module
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          # Floats on purpose: advisories land in the newest Go release first,
+          # and the point of this job is to notice them.
+          go-version: stable
+
+      # Pinned rather than @latest: a scanner is code that runs before anything
+      # is verified, so what it does should not change without a commit.
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
+
+  selfcheck:
+    name: self-check this binary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version: stable
+
+      # Dogfooding: the library checks a binary this repo built. The example's
+      # exit status is 0 clean, 1 findings, 2 check failed, so a new advisory
+      # in a dependency goes red here even before govulncheck runs.
+      - name: build the example
+        run: go build -o /tmp/selfcheck ./examples/selfcheck-cli
+
+      - name: self-check the example binary
+        run: /tmp/selfcheck -binary /tmp/selfcheck -v

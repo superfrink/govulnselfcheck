@@ -1,0 +1,36 @@
+fixture-tags: 2 vulnerable module version(s) in this build
+
+  GO-2026-0001  example.com/a v1.0.0
+      fixed in v1.5.0
+      Panic in Decode
+
+  GO-2026-0005  example.com/a v1.0.0
+      no fix published
+      Fix-less advisory
+
+-- Build --
+
+  Target:   fixture-tags
+  Go:       go1.26.11
+  Commit:   4f2a9c1 (2026-11-25T21:40:00Z)
+  Main:     github.com/superfrink/fixture-tags
+  platform: linux/amd64
+  Checked:  2026-11-25T23:05:00Z
+  Database: 41209 modules in the index, 3 entries read
+
+-- Not counted (1 pending, 1 ignored, 1 unlinked) --
+
+  GO-2026-0003  example.com/a  ignored
+      accepted: no crypto use in this service
+  GO-2026-0004  example.com/a  unlinked
+      affected package example.com/a/parser is not linked into this binary
+  GO-2026-0002  example.com/b  pending
+      within grace period until 2026-11-08
+
+-- Incomplete (1) --
+
+This check did not examine everything it was asked to:
+
+  entry-missing GO-2025-9999 example.com/a: using the module index alone
+
+These results come from a version-based check at startup, not a call-graph analysis: the vulnerable code may or may not be exercised. See https://pkg.go.dev/vuln/ for details.

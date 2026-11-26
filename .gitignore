@@ -2,5 +2,5 @@
 *.out
 coverage.txt
 /dist/
-govulnselfcheck
-selfcheck-cli
+/govulnselfcheck
+/selfcheck-cli

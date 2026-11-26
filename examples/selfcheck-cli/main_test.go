@@ -75,13 +75,13 @@ func advisoryDB(t *testing.T) string {
 			Module: osv.StdlibModule,
 			Ranges: []osv.Range{{
 				Type:   "SEMVER",
-				Events: []osv.Event{{Introduced: "0"}, {Fixed: "1.26.0"}},
+				Events: []osv.Event{{Introduced: "0"}, {Fixed: "99.0.0"}},
 			}},
 		}},
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/index/modules.json", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `[{"path":%q,"vulns":[{"id":"GO-2026-9001","fixed":"1.26.0"}]}]`, osv.StdlibModule)
+		fmt.Fprintf(w, `[{"path":%q,"vulns":[{"id":"GO-2026-9001","fixed":"99.0.0"}]}]`, osv.StdlibModule)
 	})
 	mux.HandleFunc("/ID/GO-2026-9001.json", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(entry)
@@ -257,13 +257,13 @@ func TestGracePeriod(t *testing.T) {
 			Module: osv.StdlibModule,
 			Ranges: []osv.Range{{
 				Type:   "SEMVER",
-				Events: []osv.Event{{Introduced: "0"}, {Fixed: "1.26.0"}},
+				Events: []osv.Event{{Introduced: "0"}, {Fixed: "99.0.0"}},
 			}},
 		}},
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/index/modules.json", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `[{"path":%q,"vulns":[{"id":"GO-2026-9002","fixed":"1.26.0"}]}]`, osv.StdlibModule)
+		fmt.Fprintf(w, `[{"path":%q,"vulns":[{"id":"GO-2026-9002","fixed":"99.0.0"}]}]`, osv.StdlibModule)
 	})
 	mux.HandleFunc("/ID/GO-2026-9002.json", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(entry)

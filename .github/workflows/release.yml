@@ -26,8 +26,11 @@ jobs:
         with:
           go-version: '1.25.x'
 
+      # A tag is published only if the tests pass under the race detector, the
+      # same way CI runs them. A release gate that tests less than CI is a gate
+      # that lets a race through exactly once: in public.
       - name: test before releasing
-        run: go test ./...
+        run: go test -race -count=1 ./...
 
       - uses: sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab # v4.1.4
         with:

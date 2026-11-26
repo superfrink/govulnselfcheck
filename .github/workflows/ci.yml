@@ -48,16 +48,21 @@ jobs:
 
       - run: go vet ./...
 
+      # -race on every run: the cache, the bounded worker pool and the periodic
+      # loop all have concurrency a plain `go test` never exercises under the
+      # detector. -shuffle catches tests that only pass in file order.
       - name: go test
-        run: go test -race ./...
+        run: go test -race -shuffle=on ./...
 
-      - name: coverage floor (osv + policy)
+      # One run, under the race detector, and no fallback: the previous version
+      # had `|| go test ./osv/`, which turned a failing test in the root package
+      # into a passing coverage number.
+      - name: coverage floor
         run: |
-          go test -coverprofile=/tmp/cover.out ./osv/ . >/dev/null 2>&1 || \
-            go test -coverprofile=/tmp/cover.out ./osv/ >/dev/null
+          go test -race -count=1 -coverprofile=/tmp/cover.out ./...
           cov=$(go tool cover -func=/tmp/cover.out | tail -1 | awk '{print $3}' | tr -d '%')
           echo "coverage: ${cov}%"
-          awk -v c="$cov" 'BEGIN{ if (c+0 < 90) { print "coverage below 90%"; exit 1 } }'
+          awk -v c="$cov" 'BEGIN{ if (c+0 < 88) { print "coverage below 88%"; exit 1 } }'
 
       - name: build
         run: go build ./...

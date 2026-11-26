@@ -154,12 +154,18 @@ go run ./examples/selfcheck-cli -every 12h
 ## Development
 
 ```sh
-go test -race ./...
-go vet ./...
+make check        # gofmt, vet, and go test -race -shuffle=on ./...
+make cover        # the same tests, plus the coverage floor
 ```
 
-The database calls are fakes in tests; `testdb` is an in-memory database new
-tests can use. Coverage floors and the weekly advisory scan are in
+Tests run under the race detector, always. The cache, the bounded worker pool
+and the periodic loop all have concurrency that a plain `go test` never
+exercises, so a race there would only be found in production. `-race` needs
+cgo, so a C compiler must be installed.
+
+The database is a fake in tests; `testdb` is an in-memory database new tests
+can use, and the example CLI is tested against an `httptest` server, including
+its exit status contract. Coverage floors and the weekly advisory scan are in
 `.github/workflows`.
 
 ## License
